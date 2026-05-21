@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: love-bot-api
+    runtime: python
+    region: singapore
+    plan: starter
+    buildCommand: pip install -e .
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    rootDir: backend
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: VOYAGE_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: APP_SHARED_KEY
+        sync: false
