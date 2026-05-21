@@ -6,10 +6,12 @@ import 'react-native-reanimated';
 
 import { ThemeProvider, useTheme } from '@/lib/theme';
 import { bindThemeSetter } from '@/lib/toolExecutor';
+import { registerForPush } from '@/lib/notifications';
 
 function WireTools() {
   const { set } = useTheme();
   useEffect(() => { bindThemeSetter(set); }, [set]);
+  useEffect(() => { registerForPush(); }, []);
   return null;
 }
 
