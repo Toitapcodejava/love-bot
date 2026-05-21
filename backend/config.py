@@ -1,19 +1,18 @@
 import os
 import yaml
 from pathlib import Path
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env")
+
     anthropic_api_key: str
     voyage_api_key: str
     database_url: str
     app_shared_key: str
     chat_model: str = "claude-sonnet-4-6"
     extract_model: str = "claude-haiku-4-5-20251001"
-
-    class Config:
-        env_file = ".env"
 
 
 settings = Settings()
