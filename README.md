@@ -11,6 +11,11 @@ Personalized post-breakup healing app. Single-user, private.
 
 ## Deploy
 
-See `backend/render.yaml` for Render Singapore deployment.
+Backend deploys to Railway (Singapore region).
+See `backend/railway.json` for config.
 
-> Note: `backend/render.yaml` is created in task 1.9 and `backend/bootstrap_seed.py` is created in task 1.8.
+Set these env vars in Railway dashboard:
+- ANTHROPIC_API_KEY
+- VOYAGE_API_KEY  
+- DATABASE_URL
+- APP_SHARED_KEY
