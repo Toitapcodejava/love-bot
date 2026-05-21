@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from db import get_pool, run_migrations
-from routes import chat as chat_route
+from routes import chat as chat_route, vent as vent_route, rage as rage_route, memory as memory_route
 
 
 @asynccontextmanager
@@ -23,6 +23,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(chat_route.router)
+app.include_router(vent_route.router)
+app.include_router(rage_route.router)
+app.include_router(memory_route.router)
 
 
 @app.get("/health")
