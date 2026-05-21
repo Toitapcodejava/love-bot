@@ -5,7 +5,7 @@ import httpx
 from fastapi import APIRouter, Request, HTTPException
 from pydantic import BaseModel
 
-from config import get_settings
+from config import settings
 
 router = APIRouter(prefix="/push", tags=["push"])
 
@@ -35,7 +35,6 @@ async def register(body: RegisterBody):
 
 @router.post("/tick")
 async def tick(request: Request):
-    settings = get_settings()
     cron_key = request.headers.get("x-cron-key", "")
     if cron_key != settings.app_shared_key:
         raise HTTPException(status_code=401)
