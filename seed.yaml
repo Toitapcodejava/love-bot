@@ -5,11 +5,12 @@ user:
   pronouns_with_ai: ["mày", "tao"]
   region: "north"
   music_taste:
-    genres: ["SZA", "R&B", "neo soul"]
+    artists: ["SZA"]
+    genres: ["R&B", "neo soul"]
     mood_songs:
       sad: ["SZA - Good Days", "SZA - Snooze"]
       angry: ["SZA - Shirt", "SZA - F2F"]
-      heal: ["SZA -20 Something", "SZA - Garden (Say It Like Dat)"]
+      heal: ["SZA - 20 Something", "SZA - Garden (Say It Like Dat)"]
 
 ex:
   alias_for_ai: "thằng đó / nó / cái thằng kia"

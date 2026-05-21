@@ -5,3 +5,12 @@ __pycache__/
 node_modules/
 .expo/
 dist/
+*.env
+.env.*
+.DS_Store
+*.egg-info/
+build/
+*.log
+.pytest_cache/
+.coverage
+coverage/

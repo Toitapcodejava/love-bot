@@ -12,3 +12,5 @@ Personalized post-breakup healing app. Single-user, private.
 ## Deploy
 
 See `backend/render.yaml` for Render Singapore deployment.
+
+> Note: `backend/render.yaml` is created in task 1.9 and `backend/bootstrap_seed.py` is created in task 1.8.
