@@ -5,11 +5,16 @@
     "scheme": "lovebot",
     "version": "1.0.0",
     "orientation": "portrait",
-    "platforms": ["android"],
+    "platforms": [
+      "android"
+    ],
     "icon": "./assets/images/icon.png",
     "android": {
       "package": "com.dev.lovebot",
-      "permissions": ["VIBRATE", "RECEIVE_BOOT_COMPLETED"],
+      "permissions": [
+        "VIBRATE",
+        "RECEIVE_BOOT_COMPLETED"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#0a0a0a",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -19,11 +24,11 @@
     },
     "plugins": [
       "expo-router",
-      "expo-haptics",
-      "expo-sensors",
       [
         "expo-notifications",
-        { "sounds": [] }
+        {
+          "sounds": []
+        }
       ],
       "expo-secure-store",
       [
@@ -37,6 +42,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "8c503555-87ef-470a-826d-bd28d9de0538"
+      }
+    },
+    "owner": "nguyenviethungsoicthust"
   }
 }
