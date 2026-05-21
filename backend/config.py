@@ -17,7 +17,7 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-ROOT = Path(__file__).parent.parent
+ROOT = Path(__file__).parent
 PROMPTS = Path(__file__).parent / "prompts"
 
 
