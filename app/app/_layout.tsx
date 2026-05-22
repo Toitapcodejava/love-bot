@@ -1,6 +1,8 @@
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import * as Notifications from "expo-notifications";
+import * as SecureStore from "expo-secure-store";
 import { useEffect, useRef, useState } from "react";
 import "react-native-reanimated";
 
@@ -12,12 +14,22 @@ import { CheckInModal } from "@/components/CheckInModal";
 import { QuoteModal } from "@/components/QuoteModal";
 import { getJSON } from "@/lib/api";
 import { storage } from "@/lib/storage";
+import { restartLocationIfNeeded } from "@/lib/location";
 
 export { ErrorBoundary } from "expo-router";
 
 export const unstable_settings = { initialRouteName: "(tabs)" };
 
 SplashScreen.preventAutoHideAsync();
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowBanner: true,
+    shouldShowList: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 function WireTools() {
   const { set } = useTheme();
@@ -34,6 +46,10 @@ function AppShell() {
   const pendingCheckIn = useRef(false);
 
   useEffect(() => {
+    restartLocationIfNeeded();
+  }, []);
+
+  useEffect(() => {
     if (!loaded) return;
 
     async function initQuote() {
@@ -41,8 +57,6 @@ function AppShell() {
         const base = await storage.getBase();
         if (!base) return;
 
-        // Đọc persona_mode trực tiếp qua SecureStore
-        const { default: SecureStore } = await import("expo-secure-store");
         const mode = (await SecureStore.getItemAsync("PERSONA_MODE")) ?? "tsundere";
 
         if (mode !== "silent_beauty") {
@@ -50,7 +64,6 @@ function AppShell() {
           return;
         }
 
-        // Hiện modal ngay (loading state) rồi fetch
         setShowQuote(true);
         pendingCheckIn.current = isStale(status);
 
@@ -60,7 +73,6 @@ function AppShell() {
           const data = await getJSON("/api/quotes/daily");
           setQuoteText(data.quote ?? "");
         } catch {
-          // timeout hoặc lỗi → đóng modal luôn
           setShowQuote(false);
           if (pendingCheckIn.current) setShowCheckIn(true);
           pendingCheckIn.current = false;
