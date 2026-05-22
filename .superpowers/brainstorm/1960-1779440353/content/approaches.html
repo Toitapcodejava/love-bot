@@ -1,0 +1,40 @@
+<h2>3 Approaches — Tổng thể kiến trúc tính năng</h2>
+<p class="subtitle">Chọn hướng tiếp cận phù hợp nhất trước khi đi vào design chi tiết</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Lightweight & Focused</h3>
+      <p>Check-in ritual đơn giản (emoji grid + note). Status chip tối giản. Boss battle độc lập không kết nối với status. Nhanh implement, ít bug.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Dễ implement</li><li>Ít moving parts</li><li>UX rõ ràng</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Các tính năng không liên kết</li><li>Ít "wow" factor</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B ★</div>
+    <div class="content">
+      <h3>Connected State System (Recommended)</h3>
+      <p>Status của Kem là trung tâm — check-in ritual → cập nhật status → status chip hiển thị → ảnh hưởng boss battle (boss type thay đổi theo mood) → AI phản hồi có context. Mọi thứ liên kết nhau.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Trải nghiệm nhất quán</li><li>AI có context tốt hơn</li><li>Boss battle có ý nghĩa hơn</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Phức tạp hơn A</li><li>Cần state management</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Full Gamification Layer</h3>
+      <p>Thêm XP system, level up, achievement badges. Check-in cho XP, đánh boss cho XP, chat cho XP. App trở thành một game cảm xúc.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Cực kỳ engaging</li><li>Retention cao</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Scope rất lớn</li><li>Có thể xung đột với mục đích healing</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>

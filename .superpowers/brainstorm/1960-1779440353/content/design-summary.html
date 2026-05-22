@@ -1,0 +1,74 @@
+<h2>Design Tổng Thể — Connected State System</h2>
+<p class="subtitle">Tóm tắt toàn bộ những gì sẽ build. Approve để đi vào implementation plan.</p>
+
+<div class="section">
+  <h3>1. Đổi tên nhân vật</h3>
+  <div style="display:flex; gap:16px; font-size:13px;">
+    <div style="background:#1a1a2e; border-radius:8px; padding:10px 16px;">
+      <div style="color:#555; font-size:10px;">AI (trước)</div>
+      <div style="color:#ccc;">🌙 "Kem" (header chat)</div>
+    </div>
+    <div style="color:#7aa2f7; align-self:center; font-size:18px;">→</div>
+    <div style="background:#1a1a2e; border:1px solid #7aa2f7; border-radius:8px; padding:10px 16px;">
+      <div style="color:#7aa2f7; font-size:10px;">AI (mới)</div>
+      <div style="color:#fff;">🌙 "Bạn của Kem"</div>
+    </div>
+  </div>
+  <p style="color:#888; font-size:12px; margin-top:8px;">User = "Ngọc Khánh" / "Kem". Chat bubbles user side không cần label, nhưng greeting message AI sẽ gọi đúng tên "Kem" hoặc "Ngọc Khánh".</p>
+</div>
+
+<div class="section">
+  <h3>2. Check-in Ritual</h3>
+  <ul style="color:#aaa; font-size:13px; padding-left:16px; line-height:1.8;">
+    <li>Hiện khi mở app lần đầu trong ngày (hoặc sau 4h không dùng)</li>
+    <li>Grid 6 emoji trạng thái + optional text note</li>
+    <li>Lưu vào <code>userStatus</code> (AsyncStorage): <code>{ emoji, label, note, timestamp }</code></li>
+    <li>AI nhận status qua system prompt context</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h3>3. Status Chip (Chat Screen)</h3>
+  <ul style="color:#aaa; font-size:13px; padding-left:16px; line-height:1.8;">
+    <li>Floating chip ngay trên input bar, hiển thị emoji + label hiện tại</li>
+    <li>Tap chip → mở mini picker để đổi status bất kỳ lúc nào</li>
+    <li>Nếu status = tức/buồn/lo/trống/kiệt → hiện thêm chip <strong style="color:#ff6666;">"🔥 Đập ngay"</strong> → navigate sang Rage screen với boss đúng loại</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h3>4. Boss Battle (Rage Screen)</h3>
+  <ul style="color:#aaa; font-size:13px; padding-left:16px; line-height:1.8;">
+    <li>Boss type auto-select từ userStatus, hoặc Kem tự chọn nếu không có status</li>
+    <li>HP bar, idle float animation, weapon selector (giữ nguyên 4 weapons cũ)</li>
+    <li>Touch anywhere trên boss area → damage hit, shake animation, damage number float</li>
+    <li>Combo multiplier: đánh liên tục &lt;1s tăng x, nghỉ &gt;1.5s reset</li>
+    <li>HP &lt; 30%: boss đổi màu đỏ, rung nhanh hơn</li>
+    <li>Boss chết: explosion → death screen → AI quip → nút "Nói chuyện" về chat</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h3>Luồng kết nối</h3>
+  <div style="background:#0d0d1a; border-radius:8px; padding:12px; font-size:12px; color:#888; line-height:2; text-align:center;">
+    <span style="color:#7aa2f7;">Check-in</span>
+    <span style="color:#444;"> → </span>
+    <span style="color:#ccc;">userStatus store</span>
+    <span style="color:#444;"> → </span>
+    <span style="color:#7aa2f7;">Status chip</span>
+    <span style="color:#444;"> + </span>
+    <span style="color:#bb9af7;">AI context</span>
+    <br/>
+    <span style="color:#444;">↓ (nếu mood tiêu cực)</span><br/>
+    <span style="color:#ff6666;">"Đập ngay" chip</span>
+    <span style="color:#444;"> → </span>
+    <span style="color:#ff8800;">Boss Battle</span>
+    <span style="color:#444;"> → </span>
+    <span style="color:#7aa2f7;">Quip → Chat</span>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Ngoài scope (không build lần này)</h3>
+  <p style="color:#555; font-size:12px;">XP system, achievements, level-up, push notifications, history check-in</p>
+</div>

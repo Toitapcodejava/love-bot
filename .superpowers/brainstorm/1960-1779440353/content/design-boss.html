@@ -1,0 +1,102 @@
+<h2>Design: Boss Battle — Rage Screen</h2>
+<p class="subtitle">Touch trực tiếp lên boss để đánh. Boss sống động, có HP bar, phản ứng từng đòn.</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">Rage Screen — Boss Battle</div>
+    <div class="mockup-body" style="background:#0a0a0a; padding:16px; border-radius:8px; font-family:monospace; min-height:480px; position:relative;">
+
+      <!-- Header: boss name + HP -->
+      <div style="margin-bottom:12px;">
+        <div style="color:#ff6666; font-size:11px; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">KẺ THÙ</div>
+        <div style="color:#fff; font-size:15px; font-weight:700; margin-bottom:6px;">😡 Cơn Tức Giận</div>
+        <div style="background:#1a1a1a; border-radius:4px; height:8px; overflow:hidden;">
+          <div style="background:linear-gradient(to right,#ff4444,#ff8800); width:65%; height:100%; border-radius:4px;"></div>
+        </div>
+        <div style="color:#888; font-size:10px; margin-top:2px;">650 / 1000 HP</div>
+      </div>
+
+      <!-- Weapon selector -->
+      <div style="display:flex; gap:8px; margin-bottom:16px;">
+        <div style="background:#2a1a1a; border:2px solid #ff4444; border-radius:8px; padding:6px 10px; font-size:18px;">🔨</div>
+        <div style="background:#1a1a2e; border-radius:8px; padding:6px 10px; font-size:18px; opacity:0.5;">⚾</div>
+        <div style="background:#1a1a2e; border-radius:8px; padding:6px 10px; font-size:18px; opacity:0.5;">💣</div>
+        <div style="background:#1a1a2e; border-radius:8px; padding:6px 10px; font-size:18px; opacity:0.5;">🔥</div>
+        <div style="color:#888; font-size:10px; align-self:center; margin-left:4px;">← chọn vũ khí</div>
+      </div>
+
+      <!-- Boss area — touch zone -->
+      <div style="background:#0d0d1a; border:2px dashed #333; border-radius:16px; padding:20px; text-align:center; margin-bottom:12px; position:relative; min-height:180px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <div style="color:#555; font-size:10px; position:absolute; top:8px; left:0; right:0; text-align:center;">TAP ĐỂ ĐÁNH</div>
+
+        <!-- Boss sprite (animated in real app) -->
+        <div style="font-size:72px; margin-bottom:8px; filter:drop-shadow(0 0 12px #ff4444);">😡</div>
+
+        <!-- Hit flash overlay (shown on hit) -->
+        <div style="font-size:22px; color:#ff4444; font-weight:900; font-family:sans-serif;">-85</div>
+
+        <!-- Boss shaking label -->
+        <div style="color:#ff8800; font-size:10px; margin-top:4px;">đang sống... đang đau...</div>
+      </div>
+
+      <!-- Combo counter -->
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="background:#1a1a2e; border-radius:8px; padding:6px 12px;">
+          <div style="color:#7aa2f7; font-size:10px;">COMBO</div>
+          <div style="color:#fff; font-size:18px; font-weight:900;">x5</div>
+        </div>
+        <div style="color:#888; font-size:11px; text-align:center;">
+          Boss type thay đổi<br/>theo status của Kem
+        </div>
+        <div style="background:#1a1a2e; border-radius:8px; padding:6px 12px;">
+          <div style="color:#bb9af7; font-size:10px;">DAMAGE</div>
+          <div style="color:#fff; font-size:18px; font-weight:900;">425</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">Boss bị tiêu diệt — Death Screen</div>
+    <div class="mockup-body" style="background:#0a0a0a; padding:16px; border-radius:8px; font-family:monospace; min-height:480px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+
+      <div style="font-size:60px; margin-bottom:12px;">💀</div>
+      <div style="color:#ff4444; font-size:18px; font-weight:900; margin-bottom:4px;">ĐÃ TIÊU DIỆT!</div>
+      <div style="color:#888; font-size:12px; margin-bottom:24px;">Cơn Tức Giận đã bị dập tắt</div>
+
+      <!-- Quip from AI -->
+      <div style="background:#1a1a2e; border-radius:12px; padding:12px 16px; margin-bottom:20px; max-width:220px;">
+        <div style="color:#7aa2f7; font-size:10px; margin-bottom:4px;">Bạn của Kem nói:</div>
+        <div style="color:#ccc; font-size:13px; font-style:italic;">"Đánh xong chưa. Giờ kể tao nghe chuyện gì xảy ra đi."</div>
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <div style="background:#1a1a2e; border-radius:8px; padding:10px 16px; color:#ccc; font-size:12px;">Đánh lại</div>
+        <div style="background:linear-gradient(to right,#7aa2f7,#bb9af7); border-radius:8px; padding:10px 16px; color:#fff; font-size:12px; font-weight:700;">Nói chuyện →</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:16px;">
+  <h3>Boss Types theo Status</h3>
+  <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px; font-size:12px;">
+    <div style="background:#1a1a2e; border-radius:8px; padding:8px; text-align:center;"><div style="font-size:20px;">😤</div><div style="color:#ff6666; font-size:10px;">Tức → "Cơn Tức"</div></div>
+    <div style="background:#1a1a2e; border-radius:8px; padding:8px; text-align:center;"><div style="font-size:20px;">😢</div><div style="color:#7aa2f7; font-size:10px;">Buồn → "Nỗi Buồn"</div></div>
+    <div style="background:#1a1a2e; border-radius:8px; padding:8px; text-align:center;"><div style="font-size:20px;">😰</div><div style="color:#bb9af7; font-size:10px;">Lo lắng → "Nỗi Lo"</div></div>
+    <div style="background:#1a1a2e; border-radius:8px; padding:8px; text-align:center;"><div style="font-size:20px;">😶</div><div style="color:#888; font-size:10px;">Trống → "Sự Vô Cảm"</div></div>
+    <div style="background:#1a1a2e; border-radius:8px; padding:8px; text-align:center;"><div style="font-size:20px;">🫠</div><div style="color:#f7c948; font-size:10px;">Kiệt sức → "Mệt Mỏi"</div></div>
+    <div style="background:#1a1a2e; border-radius:8px; padding:8px; text-align:center;"><div style="font-size:20px;">❓</div><div style="color:#555; font-size:10px;">Không có status → free pick</div></div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:12px;">
+  <h3>Animation & Interaction</h3>
+  <ul style="color:#aaa; font-size:12px; padding-left:16px;">
+    <li>Boss idle: <strong style="color:#ccc;">float up/down</strong> nhẹ liên tục (Animated.loop)</li>
+    <li>Mỗi touch: boss <strong style="color:#ff6666;">giật lùi + shake</strong>, damage number nổi lên rồi fade</li>
+    <li>HP thấp (&lt;30%): boss <strong style="color:#ff8800;">đổi màu đỏ/cam</strong>, shake nhanh hơn</li>
+    <li>Boss chết: <strong style="color:#ccc;">explosion animation</strong> → death screen với quip từ AI</li>
+    <li>Combo: đánh liên tục trong 1s tăng multiplier, nghỉ &gt;1.5s reset</li>
+  </ul>
+</div>
