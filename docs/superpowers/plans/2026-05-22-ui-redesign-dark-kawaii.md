@@ -6,7 +6,7 @@
 
 **Architecture:** Backend phân loại mood sau mỗi lượt chat (Haiku call nhỏ), emit SSE event `mood` + `reaction_emoji` về frontend. Frontend lưu mood vào state, dùng để drive avatar badge, bubble, và tab Đập. Push notification đã có infrastructure — chỉ cần mood flow vào `mood_snapshots`.
 
-**Tech Stack:** React Native / Expo 56, React Native Animated (built-in), FastAPI, asyncpg, Anthropic SDK (claude-haiku-4-5-20251001 cho mood classification)
+**Tech Stack:** React Native / Expo 56, expo-linear-gradient, React Native Animated (built-in), FastAPI, asyncpg, Anthropic SDK (claude-haiku-4-5-20251001 cho mood classification)
 
 ---
 
@@ -24,6 +24,43 @@
 | `app/app/(tabs)/rage.tsx` | Modify | Mood=annoyed on enter, cập nhật màu |
 | `backend/routes/chat.py` | Modify | Mood classification sau stream, emit `mood` + `reaction_emoji` SSE events, save to DB |
 | `backend/routes/push.py` | Modify | Cập nhật schedule heuristic khớp spec (8h, 14h, 21h30) |
+
+---
+
+## Task 0: Cài expo-linear-gradient
+
+**Files:** (không có file thay đổi — chỉ cài package)
+
+- [ ] **Step 1: Cài package**
+
+```bash
+cd app && npx expo install expo-linear-gradient
+```
+
+Expected output: package added to `package.json` và `package-lock.json`.
+
+- [ ] **Step 2: Verify import hoạt động**
+
+Tạo file test tạm `app/components/_gradient_check.tsx`:
+```tsx
+import { LinearGradient } from "expo-linear-gradient";
+export const _check = LinearGradient; // just import check
+```
+
+Chạy TypeScript check:
+```bash
+cd app && npx tsc --noEmit 2>&1 | grep gradient
+```
+Expected: không có lỗi liên quan đến `expo-linear-gradient`.
+
+Xóa file test: `rm app/components/_gradient_check.tsx`
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add app/package.json app/package-lock.json
+git commit -m "chore: add expo-linear-gradient for true gradient support"
+```
 
 ---
 
@@ -88,6 +125,7 @@ git commit -m "feat: Dark Kawaii palette — purple/blue accent, surface/border 
 ```tsx
 import { useEffect, useRef } from "react";
 import { View, Text, Animated, StyleSheet } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 export type Mood = "neutral" | "annoyed" | "concerned" | "smug" | "warm" | "thinking";
 
@@ -153,20 +191,18 @@ export function Avatar({ mood, streaming, size = 42 }: AvatarProps) {
           transform: [{ scale: glowScale }],
         }
       ]} />
-      {/* Avatar circle */}
-      <View style={{
-        width: size, height: size, borderRadius: size / 2,
-        alignItems: "center", justifyContent: "center",
-        // Gradient via layered views (RN không có LinearGradient built-in)
-        backgroundColor: "#7aa2f7",
-      }}>
-        <View style={{
-          position: "absolute", bottom: 0, right: 0, left: 0, top: size / 2,
-          borderBottomLeftRadius: size / 2, borderBottomRightRadius: size / 2,
-          backgroundColor: "#bb9af7",
-        }} />
+      {/* Avatar circle — true gradient */}
+      <LinearGradient
+        colors={["#7aa2f7", "#bb9af7"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{
+          width: size, height: size, borderRadius: size / 2,
+          alignItems: "center", justifyContent: "center",
+        }}
+      >
         <Text style={{ fontSize: size * 0.52 }}>🌙</Text>
-      </View>
+      </LinearGradient>
       {/* Emoji badge */}
       <Animated.View style={{
         position: "absolute", bottom: 2, right: 2,
@@ -200,9 +236,13 @@ git commit -m "feat: Avatar component — gradient circle, emoji badge reactive,
 
 ```tsx
 import { useEffect, useRef } from "react";
-import { View, Animated } from "react-native";
+import { View, Text, Animated } from "react-native";
 
-export function TypingIndicator() {
+interface TypingIndicatorProps {
+  showLabel?: boolean; // hiển thị "đang gõ..." bên cạnh dots
+}
+
+export function TypingIndicator({ showLabel = false }: TypingIndicatorProps) {
   const dots = [useRef(new Animated.Value(0.2)).current,
                 useRef(new Animated.Value(0.2)).current,
                 useRef(new Animated.Value(0.2)).current];
@@ -231,6 +271,9 @@ export function TypingIndicator() {
           opacity: dot,
         }} />
       ))}
+      {showLabel && (
+        <Text style={{ color: "#7aa2f7", fontSize: 10, marginLeft: 2 }}>đang gõ...</Text>
+      )}
     </View>
   );
 }
@@ -255,7 +298,9 @@ git commit -m "feat: TypingIndicator — 3 dots wave animation"
 ```tsx
 import { useEffect, useRef } from "react";
 import { View, Text, Animated } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "@/lib/theme";
+import { TypingIndicator } from "./TypingIndicator";
 
 interface ChatBubbleProps {
   role: "user" | "assistant";
@@ -267,6 +312,7 @@ interface ChatBubbleProps {
 export function ChatBubble({ role, content, reactionEmoji, isLatest }: ChatBubbleProps) {
   const { palette } = useTheme();
   const isUser = role === "user";
+  const isTyping = !isUser && content === "" && isLatest;
   const slideAnim = useRef(new Animated.Value(isLatest ? (isUser ? 20 : -20) : 0)).current;
   const opacityAnim = useRef(new Animated.Value(isLatest ? 0 : 1)).current;
 
@@ -279,45 +325,41 @@ export function ChatBubble({ role, content, reactionEmoji, isLatest }: ChatBubbl
     }
   }, []);
 
+  const bubbleStyle = {
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
+    borderBottomLeftRadius: isUser ? 18 : 4,
+    borderBottomRightRadius: isUser ? 4 : 18,
+    overflow: "hidden" as const,
+  };
+
   return (
     <View style={{ alignSelf: isUser ? "flex-end" : "flex-start", marginVertical: 3, maxWidth: "80%" }}>
-      <Animated.View style={{
-        transform: [{ translateX: slideAnim }],
-        opacity: opacityAnim,
-        backgroundColor: isUser ? "transparent" : palette.surface,
-        borderRadius: isUser ? undefined : undefined,
-        // iMessage shape
-        borderTopLeftRadius: 18,
-        borderTopRightRadius: 18,
-        borderBottomLeftRadius: isUser ? 18 : 4,
-        borderBottomRightRadius: isUser ? 4 : 18,
-        // User bubble: gradient via layered background
-        overflow: "hidden",
-      }}>
-        {isUser && (
-          <View style={{
-            position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: palette.accent,
-          }} />
+      <Animated.View style={{ transform: [{ translateX: slideAnim }], opacity: opacityAnim }}>
+        {isTyping ? (
+          /* Typing bubble — 3 dots in a bubble while streaming */
+          <View style={[bubbleStyle, { backgroundColor: palette.surface, paddingVertical: 12, paddingHorizontal: 16 }]}>
+            <TypingIndicator />
+          </View>
+        ) : isUser ? (
+          /* User bubble — true gradient */
+          <LinearGradient
+            colors={[palette.accent, palette.accent2]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={[bubbleStyle, { paddingVertical: 10, paddingHorizontal: 14 }]}
+          >
+            <Text style={{ color: "#fff", fontSize: 14, lineHeight: 20 }}>{content}</Text>
+          </LinearGradient>
+        ) : (
+          /* Kem bubble */
+          <View style={[bubbleStyle, { backgroundColor: palette.surface, paddingVertical: 10, paddingHorizontal: 14 }]}>
+            <Text style={{ color: palette.fg, fontSize: 14, lineHeight: 20 }}>{content}</Text>
+          </View>
         )}
-        {isUser && (
-          <View style={{
-            position: "absolute", top: 0, right: 0, bottom: 0, width: "50%",
-            backgroundColor: palette.accent2,
-          }} />
-        )}
-        <Text style={{
-          color: isUser ? "#fff" : palette.fg,
-          padding: 10,
-          paddingHorizontal: 14,
-          fontSize: 14,
-          lineHeight: 20,
-        }}>
-          {content}
-        </Text>
       </Animated.View>
       {/* Reaction emoji dưới bubble Kem */}
-      {!isUser && reactionEmoji && (
+      {!isUser && !isTyping && reactionEmoji && (
         <Text style={{ fontSize: 14, marginTop: 2, marginLeft: 6 }}>{reactionEmoji}</Text>
       )}
     </View>
@@ -422,32 +464,29 @@ async def chat(payload: ChatIn, request: Request):
                             ai_text += d.text
                             yield {"event": "text", "data": d.text}
 
-            # Classify mood sau khi stream xong
+            # Classify mood sau khi stream xong — gọi 1 lần, dùng cho cả SSE lẫn DB
+            mood_result: tuple[str, str] = ("neutral", "💜")
             if ai_text:
-                mood, reaction_emoji = await classify_mood(ai_text)
-                yield {"event": "mood", "data": json.dumps({"mood": mood, "reaction_emoji": reaction_emoji})}
+                mood_result = await classify_mood(ai_text)
+                mood_val, reaction_emoji = mood_result
+                yield {"event": "mood", "data": json.dumps({"mood": mood_val, "reaction_emoji": reaction_emoji})}
 
             yield {"event": "done", "data": ""}
         finally:
             if ai_text:
                 ai_turn_id = await save_turn("assistant", ai_text)
                 asyncio.create_task(extract_and_save(user_msg, ai_text, ai_turn_id))
-                # Save mood snapshot
-                if ai_text:
-                    try:
-                        mood_val, _ = await classify_mood(ai_text)
-                        async with pool.acquire() as conn:
-                            await conn.execute(
-                                "INSERT INTO mood_snapshots (mood, trigger) VALUES ($1, $2)",
-                                mood_val, "chat"
-                            )
-                    except Exception:
-                        pass
+                # Save mood snapshot dùng kết quả đã classify ở trên
+                try:
+                    async with pool.acquire() as conn:
+                        await conn.execute(
+                            "INSERT INTO mood_snapshots (mood, trigger) VALUES ($1, $2)",
+                            mood_result[0], "chat"
+                        )
+                except Exception:
+                    pass
 
     return EventSourceResponse(gen())
-```
-
-> **Lưu ý:** `classify_mood` được gọi 2 lần — một lần để emit SSE, một lần để save DB. Chấp nhận được vì Haiku rẻ và nhanh. Nếu muốn optimize sau, cache kết quả vào biến local.
 
 - [ ] **Step 2: Chạy backend để verify không crash**
 
@@ -631,7 +670,7 @@ export default function Chat() {
         <View>
           <Text style={{ color: palette.fg, fontSize: 15, fontWeight: "700" }}>Kem</Text>
           {streaming
-            ? <TypingIndicator />
+            ? <TypingIndicator showLabel={true} />
             : <Text style={{ color: palette.accent, fontSize: 11 }}>● online</Text>
           }
         </View>
@@ -733,6 +772,7 @@ git commit -m "feat: chat screen — mood state, Avatar header, TypingIndicator,
 ```tsx
 import { Tabs } from "expo-router";
 import { View, Text } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { useShakeNavigation } from "@/lib/shake";
 
 const TAB_CONFIG = [
@@ -746,10 +786,15 @@ function EmojiTabIcon({ emoji, label, focused }: { emoji: string; label: string;
   return (
     <View style={{ alignItems: "center", paddingTop: 4 }}>
       {focused && (
-        <View style={{
-          position: "absolute", top: -8, width: 20, height: 3,
-          borderRadius: 2, backgroundColor: "#7aa2f7",
-        }} />
+        /* Gradient active indicator — khớp design-animations.html */
+        <LinearGradient
+          colors={["#7aa2f7", "#bb9af7"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={{
+            position: "absolute", top: -8, width: 20, height: 3, borderRadius: 2,
+          }}
+        />
       )}
       <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.35 }}>{emoji}</Text>
     </View>
@@ -942,7 +987,13 @@ git commit -m "feat: rage screen — weapon bounce animation, smash button scale
 
 > **Context:** `/push/register` và `/push/tick` đã tồn tại. `lib/notifications.ts` đã gọi `/push/register` đúng. Chỉ cần cập nhật heuristic `should_send_push` để khớp spec (sáng ~8h, chiều ~14h, tối ~21h30, không gửi 23h–8h).
 
-- [ ] **Step 1: Cập nhật hàm should_send_push trong push.py**
+- [ ] **Step 1: Cập nhật import và hàm should_send_push trong push.py**
+
+Thêm `import random` vào đầu file (sau các import hiện tại):
+
+```python
+import random
+```
 
 Thay hàm `should_send_push` (dòng 19–27 trong file hiện tại):
 
@@ -953,21 +1004,30 @@ def should_send_push(now: datetime, last_push: datetime | None, sent_today: int)
     if last_push and (now - last_push) < timedelta(hours=3):
         return False
     h = now.hour
+    m = now.minute
     # Không gửi 23:00–08:00
     if 23 <= h or h < 8:
         return False
-    # Gửi trong 3 window: sáng 8–10, chiều 13–15, tối 21–22:30
-    in_morning   = 8  <= h < 10
-    in_afternoon = 13 <= h < 15
-    in_evening   = 21 <= h < 23
-    return in_morning or in_afternoon or in_evening
+    # 3 target windows với ±30 phút jitter:
+    # Sáng: target 8:00, window 8:00–9:00
+    # Chiều: target 14:00, window 13:30–15:00
+    # Tối:  target 21:30, window 21:00–22:30
+    in_morning   = h == 8 and m < 60
+    in_afternoon = (h == 13 and m >= 30) or (h == 14) or (h == 15 and m == 0)
+    in_evening   = (h == 21) or (h == 22 and m < 30)
+    if not (in_morning or in_afternoon or in_evening):
+        return False
+    # Jitter: chỉ gửi ~50% số lần tick trong window để không bị predictable
+    return random.random() < 0.5
 ```
+
+> `/push/tick` được gọi bởi cron mỗi 15–30 phút. Jitter 50% kết hợp với window rộng tạo ra thời điểm gửi khác nhau mỗi ngày ±20–30 phút, khớp design spec.
 
 - [ ] **Step 2: Commit**
 
 ```bash
 git add backend/routes/push.py
-git commit -m "fix(push): update schedule heuristic — max 3/day, windows 8-10h 13-15h 21-23h"
+git commit -m "fix(push): schedule heuristic — 3 windows, max 3/day, 50% jitter for unpredictability"
 ```
 
 ---
