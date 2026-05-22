@@ -45,15 +45,31 @@ async def test_location_update_saves_record():
 
 
 @pytest.mark.asyncio
-async def test_location_suggest_no_location_returns_empty():
+async def test_location_suggest_no_location_uses_memories():
+    """Khi không có location, suggest dùng memories thay vì trả về []"""
     mock_conn = AsyncMock()
-    mock_conn.fetchrow = AsyncMock(return_value=None)
+    mock_conn.fetchrow = AsyncMock(side_effect=[
+        None,  # location query → None
+        {"mood": "neutral"},  # mood query
+    ])
+    mock_conn.fetch = AsyncMock(return_value=[
+        {"content": "Kem thích đọc sách"},
+        {"content": "Kem hay đi cafe"},
+    ])
     mock_pool = MagicMock()
     mock_pool.acquire.return_value.__aenter__ = AsyncMock(return_value=mock_conn)
     mock_pool.acquire.return_value.__aexit__ = AsyncMock(return_value=False)
 
-    with patch("routes.location.get_pool", new_callable=AsyncMock, return_value=mock_pool):
+    fake_msg = MagicMock()
+    fake_msg.content = [MagicMock(text="Đi cafe đi Kem\nHoặc đọc sách ở nhà cũng được")]
+
+    with patch("routes.location.get_pool", new_callable=AsyncMock, return_value=mock_pool), \
+         patch("routes.location._client") as mock_client:
+        mock_client.messages.create = AsyncMock(return_value=fake_msg)
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             r = await client.get("/location/suggest", headers={"x-app-key": "test-key"})
+
     assert r.status_code == 200
-    assert r.json() == {"suggestions": []}
+    data = r.json()
+    assert len(data["suggestions"]) > 0
+    assert data["suggestions"] != []

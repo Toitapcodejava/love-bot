@@ -72,21 +72,22 @@ async def location_suggest(request: Request):
         loc = await conn.fetchrow(
             "SELECT lat, lng FROM location_history ORDER BY created_at DESC LIMIT 1"
         )
-        if not loc:
-            return {"suggestions": []}
         mood_row = await conn.fetchrow(
             "SELECT mood FROM mood_snapshots ORDER BY created_at DESC LIMIT 1"
         )
+        mood = mood_row["mood"] if mood_row else "neutral"
 
-    mood = mood_row["mood"] if mood_row else "neutral"
-    poi = await _fetch_poi(loc["lat"], loc["lng"])
+        if loc:
+            poi = await _fetch_poi(loc["lat"], loc["lng"])
+            poi_text = "\n".join(f"- {p}" for p in poi) if poi else "Không có thông tin địa điểm cụ thể."
+            prompt = load_prompt("suggest").format(poi_list=poi_text, mood=mood)
+        else:
+            memories = await conn.fetch(
+                "SELECT content FROM memories ORDER BY created_at DESC LIMIT 10"
+            )
+            memory_text = "\n".join(f"- {m['content']}" for m in memories) or "(chưa có thông tin về Kem)"
+            prompt = load_prompt("suggest_no_location").format(memories=memory_text, mood=mood)
 
-    if not poi:
-        poi_text = "Không có thông tin địa điểm cụ thể."
-    else:
-        poi_text = "\n".join(f"- {p}" for p in poi)
-
-    prompt = load_prompt("suggest").format(poi_list=poi_text, mood=mood)
     msg = await _client.messages.create(
         model="claude-haiku-4-5-20251001",
         max_tokens=200,
