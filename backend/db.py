@@ -12,6 +12,7 @@ async def get_pool():
     return _pool
 
 async def run_migrations(pool):
-    sql = Path(__file__).parent.joinpath("migrations", "001_init.sql").read_text()
-    async with pool.acquire() as conn:
-        await conn.execute(sql)
+    for name in ["001_init.sql", "002_location.sql"]:
+        sql = Path(__file__).parent.joinpath("migrations", name).read_text()
+        async with pool.acquire() as conn:
+            await conn.execute(sql)
