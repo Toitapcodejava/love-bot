@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Bạn của Kem</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0d0d0d; color: #e0e0e0; font-family: monospace; font-size: 13px; }
+  #login { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; gap:12px; }
+  #login input { background:#1a1a1a; border:1px solid #333; color:#e0e0e0; padding:10px 14px; border-radius:6px; width:280px; font-family:monospace; }
+  button { background:#333; color:#e0e0e0; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-family:monospace; }
+  button:hover { background:#444; }
+  button.primary { background:#c0392b; }
+  button.primary:hover { background:#e74c3c; }
+  #app { display:none; flex-direction:column; height:100vh; }
+  .tabs { display:flex; background:#111; border-bottom:1px solid #222; }
+  .tab { padding:10px 20px; cursor:pointer; border-bottom:2px solid transparent; }
+  .tab.active { border-bottom-color:#c0392b; color:#fff; }
+  .tab-content { display:none; flex:1; overflow:auto; padding:16px; }
+  .tab-content.active { display:block; }
+  #map { height:500px; border-radius:8px; }
+  table { width:100%; border-collapse:collapse; margin-top:8px; }
+  th,td { text-align:left; padding:6px 10px; border-bottom:1px solid #1e1e1e; }
+  th { color:#888; font-weight:normal; }
+  .msg-user { color:#7ec8e3; }
+  .msg-assistant { color:#b8e0b8; }
+  textarea { width:100%; background:#1a1a1a; border:1px solid #333; color:#e0e0e0; padding:10px; border-radius:6px; font-family:monospace; resize:vertical; }
+  .row { display:flex; gap:8px; align-items:flex-start; margin-top:8px; }
+  .badge { display:inline-block; padding:2px 6px; border-radius:4px; font-size:11px; background:#222; }
+  #status-bar { padding:6px 16px; background:#111; font-size:11px; color:#555; border-top:1px solid #1e1e1e; }
+  .pagination { display:flex; gap:8px; margin-top:12px; align-items:center; }
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div style="color:#c0392b;font-size:18px;margin-bottom:8px;">⚙ Admin — Bạn của Kem</div>
+  <input id="key-input" type="password" placeholder="Admin key" />
+  <button class="primary" onclick="doLogin()">Đăng nhập</button>
+  <div id="login-err" style="color:#e74c3c;font-size:12px;"></div>
+</div>
+
+<div id="app">
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('push')">📢 Push</div>
+    <div class="tab" onclick="switchTab('gps')">📍 GPS</div>
+    <div class="tab" onclick="switchTab('chat')">💬 Chat Log</div>
+    <div class="tab" onclick="switchTab('status')">📊 Status</div>
+  </div>
+
+  <!-- PUSH TAB -->
+  <div id="tab-push" class="tab-content active">
+    <h3 style="margin-bottom:12px;">Gửi thông báo thủ công</h3>
+    <textarea id="push-msg" rows="3" placeholder="Nhập nội dung noti..."></textarea>
+    <div class="row">
+      <button class="primary" onclick="sendPush()">Gửi ngay</button>
+      <span id="push-status" style="color:#888;"></span>
+    </div>
+    <h3 style="margin:16px 0 8px;">Lịch sử push</h3>
+    <table id="push-log-table">
+      <thead><tr><th>Thời gian</th><th>Nội dung</th><th>Đã mở</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- GPS TAB -->
+  <div id="tab-gps" class="tab-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <h3>Vị trí của Kem</h3>
+      <button onclick="loadGPS()">↻ Refresh</button>
+    </div>
+    <div id="map"></div>
+    <div id="gps-count" style="color:#555;margin-top:8px;font-size:11px;"></div>
+  </div>
+
+  <!-- CHAT TAB -->
+  <div id="tab-chat" class="tab-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <h3>Lịch sử chat</h3>
+      <button onclick="loadChat()">↻ Refresh</button>
+    </div>
+    <div id="chat-log"></div>
+    <div class="pagination">
+      <button onclick="chatPage--; loadChat()">← Trước</button>
+      <span id="chat-page-label"></span>
+      <button onclick="chatPage++; loadChat()">Tiếp →</button>
+    </div>
+  </div>
+
+  <!-- STATUS TAB -->
+  <div id="tab-status" class="tab-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <h3>Mood & Push Log</h3>
+      <button onclick="loadStatus()">↻ Refresh</button>
+    </div>
+    <h4 style="margin:12px 0 6px;color:#888;">Mood Snapshots</h4>
+    <table id="mood-table">
+      <thead><tr><th>Thời gian</th><th>Mood</th><th>Confidence</th><th>Trigger</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <h4 style="margin:16px 0 6px;color:#888;">Push Log</h4>
+    <table id="status-push-table">
+      <thead><tr><th>Thời gian</th><th>Nội dung</th><th>Đã mở</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div id="status-bar">Chưa load dữ liệu</div>
+</div>
+
+<script>
+let adminKey = '';
+let map = null;
+let chatPage = 0;
+let pollTimer = null;
+
+function doLogin() {
+  const k = document.getElementById('key-input').value.trim();
+  if (!k) return;
+  adminKey = k;
+  sessionStorage.setItem('admin_key', k);
+  document.getElementById('login-err').textContent = '';
+  loadAll();
+}
+
+async function api(path, opts = {}) {
+  const r = await fetch(path, {
+    ...opts,
+    headers: { 'x-admin-key': adminKey, 'content-type': 'application/json', ...(opts.headers || {}) },
+  });
+  if (r.status === 401) {
+    adminKey = '';
+    sessionStorage.removeItem('admin_key');
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('login').style.display = 'flex';
+    document.getElementById('login-err').textContent = 'Sai key hoặc hết phiên.';
+    throw new Error('401');
+  }
+  return r.json();
+}
+
+function setStatus(msg) {
+  document.getElementById('status-bar').textContent = msg + ' — ' + new Date().toLocaleTimeString('vi-VN');
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    const names = ['push','gps','chat','status'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'gps' && !map) initMap();
+  if (name === 'gps') loadGPS();
+  if (name === 'chat') loadChat();
+  if (name === 'status') loadStatus();
+}
+
+function loadAll() {
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  loadPushLog();
+  loadStatus();
+  startPolling();
+}
+
+function startPolling() {
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(() => {
+    loadPushLog();
+    loadStatus();
+  }, 30000);
+}
+
+// ── Push ──────────────────────────────────────────────────────────────────
+async function sendPush() {
+  const msg = document.getElementById('push-msg').value.trim();
+  if (!msg) return;
+  const el = document.getElementById('push-status');
+  el.textContent = 'Đang gửi...';
+  try {
+    await api('/admin/api/push/send', { method: 'POST', body: JSON.stringify({ message: msg }) });
+    document.getElementById('push-msg').value = '';
+    el.textContent = 'Đã gửi ✓';
+    loadPushLog();
+  } catch (e) {
+    if (e.message !== '401') el.textContent = 'Lỗi gửi.';
+  }
+}
+
+async function loadPushLog() {
+  try {
+    const data = await api('/admin/api/push/log');
+    const tbody = document.querySelector('#push-log-table tbody');
+    tbody.innerHTML = data.items.map(r =>
+      `<tr><td>${fmt(r.sent_at)}</td><td>${esc(r.message)}</td><td>${r.opened ? '✓' : '—'}</td></tr>`
+    ).join('');
+    setStatus('Push log cập nhật');
+  } catch (e) {}
+}
+
+// ── GPS ───────────────────────────────────────────────────────────────────
+function initMap() {
+  map = L.map('map').setView([21.028, 105.834], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+}
+
+async function loadGPS() {
+  if (!map) initMap();
+  try {
+    const data = await api('/admin/api/location');
+    map.eachLayer(l => { if (l instanceof L.Marker || l instanceof L.CircleMarker) map.removeLayer(l); });
+
+    const items = data.items;
+    if (!items.length) { document.getElementById('gps-count').textContent = 'Chưa có dữ liệu GPS.'; return; }
+
+    const bounds = [];
+    items.forEach((loc, i) => {
+      const ratio = i / (items.length - 1 || 1);
+      const r = Math.round(46 + ratio * 186);
+      const b = Math.round(52 - ratio * 52);
+      const color = `rgb(${r},${Math.round(52*(1-ratio))},${b})`;
+      const marker = L.circleMarker([loc.lat, loc.lng], {
+        radius: i === 0 ? 10 : 6,
+        color, fillColor: color, fillOpacity: 0.85, weight: 2,
+      }).addTo(map);
+      marker.bindPopup(`<b>${fmt(loc.created_at)}</b><br>${loc.lat.toFixed(5)}, ${loc.lng.toFixed(5)}<br>Độ chính xác: ${loc.accuracy ? loc.accuracy.toFixed(0)+'m' : '?'}`);
+      bounds.push([loc.lat, loc.lng]);
+    });
+    map.fitBounds(bounds, { padding: [40, 40] });
+    document.getElementById('gps-count').textContent = `${items.length} điểm. Mới nhất: ${fmt(items[0].created_at)}`;
+  } catch (e) {}
+}
+
+// ── Chat ──────────────────────────────────────────────────────────────────
+async function loadChat() {
+  if (chatPage < 0) chatPage = 0;
+  try {
+    const data = await api(`/admin/api/chat?page=${chatPage}&limit=50`);
+    document.getElementById('chat-page-label').textContent = `Trang ${chatPage + 1}`;
+    const el = document.getElementById('chat-log');
+    el.innerHTML = data.items.map(m => `
+      <div style="margin-bottom:6px;padding:6px 10px;background:#111;border-radius:4px;border-left:2px solid ${m.role==='user'?'#3498db':'#27ae60'}">
+        <span class="badge">${m.role}</span>
+        ${m.mood ? `<span class="badge" style="margin-left:4px;">${m.mood}</span>` : ''}
+        <span style="color:#555;margin-left:8px;">${fmt(m.created_at)}</span>
+        <div class="${m.role==='user'?'msg-user':'msg-assistant'}" style="margin-top:4px;">${esc(m.content)}</div>
+      </div>`
+    ).join('');
+  } catch (e) {}
+}
+
+// ── Status ────────────────────────────────────────────────────────────────
+async function loadStatus() {
+  try {
+    const data = await api('/admin/api/status');
+    document.querySelector('#mood-table tbody').innerHTML = data.moods.map(r =>
+      `<tr><td>${fmt(r.created_at)}</td><td>${r.mood}</td><td>${r.confidence ? (r.confidence*100).toFixed(0)+'%' : '—'}</td><td>${r.trigger || '—'}</td></tr>`
+    ).join('');
+    document.querySelector('#status-push-table tbody').innerHTML = data.push_log.map(r =>
+      `<tr><td>${fmt(r.sent_at)}</td><td>${esc(r.message)}</td><td>${r.opened ? '✓' : '—'}</td></tr>`
+    ).join('');
+    setStatus('Status cập nhật');
+  } catch (e) {}
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function fmt(s) {
+  if (!s) return '—';
+  return new Date(s).toLocaleString('vi-VN');
+}
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Auto-login from session
+const saved = sessionStorage.getItem('admin_key');
+if (saved) { adminKey = saved; loadAll(); }
+</script>
+</body>
+</html>
