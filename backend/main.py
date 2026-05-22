@@ -7,6 +7,8 @@ from contextlib import asynccontextmanager
 from db import get_pool, run_migrations
 from routes import chat as chat_route, vent as vent_route, rage as rage_route, memory as memory_route
 from routes.push import router as push_router
+from routes.location import router as location_router
+from routes.admin import router as admin_router
 
 
 @asynccontextmanager
@@ -28,6 +30,8 @@ app.include_router(vent_route.router)
 app.include_router(rage_route.router)
 app.include_router(memory_route.router)
 app.include_router(push_router)
+app.include_router(location_router)
+app.include_router(admin_router)
 
 
 @app.get("/health")
