@@ -47,7 +47,6 @@ export default function GPS() {
     try {
       pos = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
-        timeInterval: 15000,
       });
     } catch {
       setState("error");
@@ -129,9 +128,27 @@ export default function GPS() {
           scrollEnabled={false}
           zoomEnabled={false}
           onMapReady={() => setMapError(false)}
+          {...{ onError: () => setMapError(true) }}
         >
           <Marker coordinate={{ latitude: location.lat, longitude: location.lng }} />
         </MapView>
+      )}
+
+      {location && mapError && (
+        <View
+          style={{
+            height: 200,
+            margin: 16,
+            borderRadius: 12,
+            backgroundColor: "#111",
+            alignItems: "center",
+            justifyContent: "center",
+            borderWidth: 1,
+            borderColor: "#222",
+          }}
+        >
+          <Text style={{ color: "#555", fontSize: 13 }}>Không tải được bản đồ</Text>
+        </View>
       )}
 
       {/* Coordinates */}
