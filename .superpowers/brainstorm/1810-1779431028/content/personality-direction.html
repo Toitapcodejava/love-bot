@@ -1,0 +1,82 @@
+<h2>Kem nên có "personality" visual như thế nào?</h2>
+<p class="subtitle">App hiện tại là dark, tối giản, edgy. Bước tiếp theo sẽ định hướng toàn bộ animation, avatar, và micro-interaction.</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="tsundere-alive" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0a0a0a;padding:20px;border-radius:8px;font-family:monospace">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#ff2d55,#ff6b6b);display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 0 20px #ff2d5566;animation:pulse 2s infinite">😤</div>
+        <div>
+          <div style="color:#fff;font-weight:700">Kem</div>
+          <div style="color:#ff2d55;font-size:11px">● đang online · đang gõ...</div>
+        </div>
+      </div>
+      <div style="background:#222;padding:10px;border-radius:10px;color:#eee;font-size:13px">
+        Ừ thì... mày lại đến. Tao không quan tâm đâu nhé. Kể đi.
+      </div>
+      <div style="margin-top:8px;display:flex;gap:6px">
+        <span style="background:#ff2d5522;border:1px solid #ff2d5544;color:#ff2d55;padding:4px 10px;border-radius:20px;font-size:11px">😤 Đập gì đó</span>
+        <span style="background:#ff2d5522;border:1px solid #ff2d5544;color:#ff2d55;padding:4px 10px;border-radius:20px;font-size:11px">💬 Kể tao nghe</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Tsundere Sống Động</h3>
+      <p>Avatar emoji phản ứng theo cảm xúc cuộc trò chuyện. Biểu cảm thay đổi (😤😒🙄😏). Pulse khi đang gõ. Nút bấm có icon gợi cảm. Vibe: "tao không care nhưng thật ra tao care."</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="lofi-glitch" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0a0a0a;padding:20px;border-radius:8px;font-family:monospace">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div style="width:52px;height:52px;border-radius:8px;background:#111;border:1px solid #333;display:flex;align-items:center;justify-content:center;font-size:22px;position:relative">
+          <span style="position:absolute;color:#ff2d55;opacity:0.5;transform:translate(2px,-1px)">K</span>
+          <span style="color:#fff;font-weight:900;letter-spacing:-2px">K</span>
+        </div>
+        <div>
+          <div style="color:#fff;font-weight:700;letter-spacing:2px;font-size:12px">KEM_SYSTEM</div>
+          <div style="color:#555;font-size:10px;font-family:monospace">SYS::ONLINE // mood: hostile</div>
+        </div>
+      </div>
+      <div style="background:#111;border:1px solid #ff2d5533;padding:10px;border-radius:4px;color:#eee;font-size:12px;font-family:monospace">
+        &gt; INPUT RECEIVED<br/>
+        &gt; PROCESSING... <span style="color:#ff2d55">█</span><br/>
+        &gt; Ừ thì mày lại đến.
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Lo-fi Glitch Terminal</h3>
+      <p>Avatar kiểu chữ/symbol với glitch effect. Text xuất hiện như terminal typing. Scan-line animation nhẹ. Màu sắc monochrome với accent đỏ. Vibe: hacker aesthetic, lạnh lùng có chiều sâu.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="kawaii-dark" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0d0d1a;padding:20px;border-radius:8px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#7aa2f7,#bb9af7);display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 0 15px #7aa2f744">🌙</div>
+        <div>
+          <div style="color:#eaeaea;font-weight:700">Kem</div>
+          <div style="color:#7aa2f7;font-size:11px">✦ đang ở đây với mày</div>
+        </div>
+      </div>
+      <div style="background:#1a1a2e;padding:10px;border-radius:12px;color:#eaeaea;font-size:13px;border:1px solid #7aa2f722">
+        Tao biết hôm nay mày mệt. Kể tao nghe đi.
+      </div>
+      <div style="margin-top:8px;display:flex;gap:6px">
+        <span style="background:#7aa2f722;border:1px solid #7aa2f744;color:#7aa2f7;padding:4px 10px;border-radius:20px;font-size:11px">🌙 Tâm sự</span>
+        <span style="background:#bb9af722;border:1px solid #bb9af744;color:#bb9af7;padding:4px 10px;border-radius:20px;font-size:11px">💜 Ký ức</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Dark Kawaii</h3>
+      <p>Vẫn dark nhưng mềm hơn, màu purple/blue thay vì đỏ. Avatar có biểu cảm dễ thương. Particle/star animation nhẹ. Giữ edgy nhưng bớt hostile, thêm warmth. Vibe: "tao care nhưng theo cách riêng."</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px">Click để chọn hướng đi, hoặc cho tôi biết trong terminal nếu muốn kết hợp.</p>
+
+<style>
+@keyframes pulse { 0%,100%{box-shadow:0 0 20px #ff2d5566} 50%{box-shadow:0 0 35px #ff2d55aa} }
+</style>

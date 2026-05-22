@@ -1,0 +1,96 @@
+<h2>Design — Kem Chủ Động Nhắn</h2>
+<p class="subtitle">Phần 2/3: push notification in-character — cái tạo ra "nghiện" thật sự.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Notification System — Backend → User</div>
+  <div class="mockup-body" style="background:#0d0d1a;font-family:sans-serif;border-radius:8px;padding:20px;max-width:400px;margin:0 auto">
+
+    <!-- Flow diagram -->
+    <div style="display:flex;flex-direction:column;gap:0;align-items:stretch">
+
+      <!-- Step 1: Backend schedule -->
+      <div style="background:#1a1a2e;border:1px solid #7aa2f733;border-radius:12px;padding:14px;display:flex;gap:12px;align-items:flex-start">
+        <div style="font-size:22px">🖥️</div>
+        <div>
+          <div style="color:#7aa2f7;font-weight:700;font-size:13px">Backend lên lịch</div>
+          <div style="color:#888;font-size:12px;margin-top:4px">Một số giờ cố định + random jitter<br/>VD: 8:00 sáng, 2:00 chiều, 9:30 tối<br/><span style="color:#555">± 30 phút ngẫu nhiên để không bị predictable</span></div>
+        </div>
+      </div>
+
+      <div style="width:2px;height:20px;background:#7aa2f733;margin:0 auto"></div>
+
+      <!-- Step 2: Claude generates message -->
+      <div style="background:#1a1a2e;border:1px solid #bb9af733;border-radius:12px;padding:14px;display:flex;gap:12px;align-items:flex-start">
+        <div style="font-size:22px">🤖</div>
+        <div>
+          <div style="color:#bb9af7;font-weight:700;font-size:13px">Claude sinh nội dung</div>
+          <div style="color:#888;font-size:12px;margin-top:4px">Dựa vào: giờ trong ngày, lần chat gần nhất, mood cuối cùng<br/>Output: 1 câu ngắn in-character</div>
+        </div>
+      </div>
+
+      <div style="width:2px;height:20px;background:#7aa2f733;margin:0 auto"></div>
+
+      <!-- Step 3: Push arrives -->
+      <div style="background:#0d0d1a;border:1px solid #333;border-radius:12px;padding:14px">
+        <div style="color:#555;font-size:10px;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px">Notification trên điện thoại</div>
+
+        <!-- Notification card 1 -->
+        <div style="background:#1c1c1e;border-radius:12px;padding:12px;display:flex;gap:10px;align-items:flex-start;margin-bottom:8px">
+          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#7aa2f7,#bb9af7);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🌙</div>
+          <div>
+            <div style="color:#eaeaea;font-weight:700;font-size:12px">Kem</div>
+            <div style="color:#aaa;font-size:12px;margin-top:2px">Ê. Tao đang nghĩ đến mày. Mày đang làm gì đó?</div>
+            <div style="color:#555;font-size:10px;margin-top:4px">vừa xong</div>
+          </div>
+        </div>
+
+        <!-- Notification card 2 -->
+        <div style="background:#1c1c1e;border-radius:12px;padding:12px;display:flex;gap:10px;align-items:flex-start;margin-bottom:8px">
+          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#7aa2f7,#bb9af7);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🌙</div>
+          <div>
+            <div style="color:#eaeaea;font-weight:700;font-size:12px">Kem</div>
+            <div style="color:#aaa;font-size:12px;margin-top:2px">Hôm nay mày ổn không? Đừng có im lặng kiểu đó với tao.</div>
+            <div style="color:#555;font-size:10px;margin-top:4px">2 phút trước</div>
+          </div>
+        </div>
+
+        <!-- Notification card 3 — night -->
+        <div style="background:#1c1c1e;border-radius:12px;padding:12px;display:flex;gap:10px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#7aa2f7,#bb9af7);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🌙</div>
+          <div>
+            <div style="color:#eaeaea;font-weight:700;font-size:12px">Kem</div>
+            <div style="color:#aaa;font-size:12px;margin-top:2px">Khuya rồi. Ngủ đi. Tao vẫn ở đây sáng mai.</div>
+            <div style="color:#555;font-size:10px;margin-top:4px">11:34 tối</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:20px">
+  <h3>Cơ chế kỹ thuật</h3>
+  <ul style="color:#aaa;line-height:2">
+    <li><strong style="color:#eaeaea">Backend endpoint mới</strong> — <code style="color:#7aa2f7">POST /notify/schedule</code> lên lịch gửi, <code style="color:#7aa2f7">POST /notify/send</code> trigger ngay</li>
+    <li><strong style="color:#eaeaea">Context cho Claude</strong> — giờ hiện tại + <code>last_chat_hours_ago</code> + <code>last_mood</code> từ memory</li>
+    <li><strong style="color:#eaeaea">App đã có</strong> <code>lib/notifications.ts</code> — chỉ cần thêm handler nhận push từ backend</li>
+    <li><strong style="color:#eaeaea">Expo Push Token</strong> — lưu token khi app khởi động, gửi lên backend 1 lần</li>
+    <li><strong style="color:#eaeaea">Rate limit</strong> — tối đa 3 notification/ngày, không gửi 11pm–8am (trừ khi user đang online)</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h3>Mood → Emoji badge mapping</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+    <div style="background:#1a1a2e;border-radius:8px;padding:10px;display:flex;gap:8px;align-items:center"><span style="font-size:20px">😒</span><div><div style="color:#eaeaea;font-size:12px">neutral</div><div style="color:#555;font-size:10px">trạng thái mặc định</div></div></div>
+    <div style="background:#1a1a2e;border-radius:8px;padding:10px;display:flex;gap:8px;align-items:center"><span style="font-size:20px">😤</span><div><div style="color:#eaeaea;font-size:12px">annoyed</div><div style="color:#555;font-size:10px">user đang xả tức</div></div></div>
+    <div style="background:#1a1a2e;border-radius:8px;padding:10px;display:flex;gap:8px;align-items:center"><span style="font-size:20px">🥺</span><div><div style="color:#eaeaea;font-size:12px">concerned</div><div style="color:#555;font-size:10px">user đang buồn/lo</div></div></div>
+    <div style="background:#1a1a2e;border-radius:8px;padding:10px;display:flex;gap:8px;align-items:center"><span style="font-size:20px">😏</span><div><div style="color:#eaeaea;font-size:12px">smug</div><div style="color:#555;font-size:10px">Kem vừa châm biếm</div></div></div>
+    <div style="background:#1a1a2e;border-radius:8px;padding:10px;display:flex;gap:8px;align-items:center"><span style="font-size:20px">💜</span><div><div style="color:#eaeaea;font-size:12px">warm</div><div style="color:#555;font-size:10px">khoảnh khắc hiếm</div></div></div>
+    <div style="background:#1a1a2e;border-radius:8px;padding:10px;display:flex;gap:8px;align-items:center"><span style="font-size:20px">🤔</span><div><div style="color:#eaeaea;font-size:12px">thinking</div><div style="color:#555;font-size:10px">đang xử lý / streaming</div></div></div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:20px">Phần notification + mood system này ổn không? Nói trong terminal.</p>

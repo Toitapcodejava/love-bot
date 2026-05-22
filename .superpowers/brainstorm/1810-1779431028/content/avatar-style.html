@@ -1,0 +1,91 @@
+<h2>Avatar của Kem trông như thế nào?</h2>
+<p class="subtitle">Đây là thứ user nhìn thấy mỗi lần mở app — cần phải "sống" và đáng nhớ.</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="emoji-reactive" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0d0d1a;padding:24px;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:12px">
+      <div style="position:relative">
+        <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#7aa2f7,#bb9af7);display:flex;align-items:center;justify-content:center;font-size:38px;box-shadow:0 0 25px #7aa2f755">🌙</div>
+        <div style="position:absolute;bottom:-4px;right:-4px;width:22px;height:22px;border-radius:50%;background:#0d0d1a;display:flex;align-items:center;justify-content:center;font-size:13px">😒</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <span style="font-size:22px;opacity:0.4">😤</span>
+        <span style="font-size:22px;border:2px solid #7aa2f7;border-radius:50%;padding:2px">😒</span>
+        <span style="font-size:22px;opacity:0.4">😏</span>
+        <span style="font-size:22px;opacity:0.4">🥺</span>
+        <span style="font-size:22px;opacity:0.4">💜</span>
+      </div>
+      <div style="color:#888;font-size:11px">biểu cảm thay đổi theo mood của cuộc trò chuyện</div>
+    </div>
+    <div class="card-body">
+      <h3>A — Emoji Reactive</h3>
+      <p>Avatar hình tròn gradient, có badge emoji nhỏ ở góc thể hiện cảm xúc hiện tại. AI phân tích mood → chọn emoji phù hợp (😤 khi user tức, 🥺 khi user buồn, 😏 khi Kem sắp châm biếm...). Đơn giản nhưng hiệu quả.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="pixel-sprite" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0d0d1a;padding:24px;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:12px">
+      <div style="image-rendering:pixelated;width:72px;height:72px;background:#1a1a2e;border:2px solid #7aa2f744;border-radius:8px;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);overflow:hidden">
+        <!-- Pixel art simulation -->
+        <div style="grid-column:3/7;grid-row:1/3;background:#bb9af7"></div>
+        <div style="grid-column:2/8;grid-row:3/7;background:#7aa2f7"></div>
+        <div style="grid-column:3;grid-row:4;background:#0d0d1a;border-radius:50%"></div>
+        <div style="grid-column:6;grid-row:4;background:#0d0d1a;border-radius:50%"></div>
+        <div style="grid-column:4/6;grid-row:6;background:#0d0d1a;height:2px;margin-top:auto"></div>
+        <div style="grid-column:2/8;grid-row:7/9;background:#bb9af733"></div>
+      </div>
+      <div style="color:#7aa2f7;font-size:11px;font-family:monospace">[ IDLE ] [ TALK ] [ THINK ] [ MAD ]</div>
+      <div style="color:#888;font-size:11px">pixel sprite với 4 animation state</div>
+    </div>
+    <div class="card-body">
+      <h3>B — Pixel Sprite</h3>
+      <p>Nhân vật pixel art nhỏ (~64px) với 4 trạng thái animation: idle (thở nhẹ), talk (miệng động), think (dấu "..."), mad (rung). Bắt mắt, retro-cute, tốn công làm nhất nhưng rất độc đáo.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="lottie-face" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0d0d1a;padding:24px;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:12px">
+      <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#1a1a2e,#2a1a4e);border:2px solid #7aa2f766;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">
+        <!-- Simulated smooth face -->
+        <svg width="50" height="50" viewBox="0 0 50 50">
+          <circle cx="18" cy="22" r="4" fill="#7aa2f7"/>
+          <circle cx="32" cy="22" r="4" fill="#7aa2f7"/>
+          <circle cx="18" cy="21" r="2" fill="#0d0d1a"/>
+          <circle cx="32" cy="21" r="2" fill="#0d0d1a"/>
+          <path d="M 18 34 Q 25 38 32 34" stroke="#bb9af7" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <circle cx="19" cy="26" r="3" fill="#bb9af733"/>
+          <circle cx="31" cy="26" r="3" fill="#bb9af733"/>
+        </svg>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:4px">
+        <div style="text-align:center">
+          <div style="width:36px;height:36px;border-radius:50%;background:#1a1a2e;border:1px solid #7aa2f744;display:flex;align-items:center;justify-content:center">
+            <svg width="24" height="24" viewBox="0 0 50 50"><circle cx="18" cy="22" r="4" fill="#7aa2f7"/><circle cx="32" cy="22" r="4" fill="#7aa2f7"/><path d="M 18 34 Q 25 38 32 34" stroke="#bb9af7" stroke-width="2" fill="none"/></svg>
+          </div>
+          <div style="color:#555;font-size:9px;margin-top:2px">calm</div>
+        </div>
+        <div style="text-align:center">
+          <div style="width:36px;height:36px;border-radius:50%;background:#1a1a2e;border:1px solid #ff2d5544;display:flex;align-items:center;justify-content:center">
+            <svg width="24" height="24" viewBox="0 0 50 50"><circle cx="18" cy="22" r="4" fill="#ff6b6b"/><circle cx="32" cy="22" r="4" fill="#ff6b6b"/><path d="M 18 36 Q 25 30 32 36" stroke="#ff2d55" stroke-width="2" fill="none"/></svg>
+          </div>
+          <div style="color:#555;font-size:9px;margin-top:2px">mad</div>
+        </div>
+        <div style="text-align:center">
+          <div style="width:36px;height:36px;border-radius:50%;background:#1a1a2e;border:1px solid #bb9af744;display:flex;align-items:center;justify-content:center">
+            <svg width="24" height="24" viewBox="0 0 50 50"><path d="M 14 18 Q 18 14 22 18" stroke="#bb9af7" stroke-width="2" fill="none"/><path d="M 28 18 Q 32 14 36 18" stroke="#bb9af7" stroke-width="2" fill="none"/><path d="M 18 34 Q 25 38 32 34" stroke="#bb9af7" stroke-width="2" fill="none"/></svg>
+          </div>
+          <div style="color:#555;font-size:9px;margin-top:2px">surprised</div>
+        </div>
+      </div>
+      <div style="color:#888;font-size:11px">smooth SVG face với nhiều biểu cảm</div>
+    </div>
+    <div class="card-body">
+      <h3>C — Smooth SVG Face</h3>
+      <p>Mặt SVG vector đơn giản, animate mượt (không cần asset file). Mắt, miệng, lông mày đều animate được. Nhiều biểu cảm hơn emoji, nhẹ hơn Lottie/pixel art, có thể làm hoàn toàn trong code.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:16px">Click để chọn, hoặc nói trong terminal nếu muốn kết hợp.</p>
