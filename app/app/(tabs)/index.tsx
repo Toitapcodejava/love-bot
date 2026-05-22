@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import {
   View, TextInput, Pressable, Text, ScrollView,
-  KeyboardAvoidingView, Platform, TouchableOpacity,
+  KeyboardAvoidingView, Platform, TouchableOpacity, Modal,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as SecureStore from "expo-secure-store";
@@ -13,6 +13,8 @@ import { StatusChip } from "@/components/StatusChip";
 import { useUserStatus, statusContext, UserStatus } from "@/lib/userStatus";
 import { useTheme } from "@/lib/theme";
 import { executeTools } from "@/lib/toolExecutor";
+import { isLocationEnabled, fetchSuggestions } from "@/lib/location";
+import { storage } from "@/lib/storage";
 
 type Msg = {
   role: "user" | "assistant";
@@ -33,6 +35,14 @@ export default function Chat() {
   const [streaming, setStreaming] = useState(false);
   const [mood, setMood] = useState<Mood>("neutral");
   const scroll = useRef<ScrollView>(null);
+  const [showSuggest, setShowSuggest] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestLoading, setSuggestLoading] = useState(false);
+  const [locationEnabled, setLocationEnabled] = useState(false);
+
+  useEffect(() => {
+    isLocationEnabled().then(setLocationEnabled);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -43,6 +53,16 @@ export default function Chat() {
       }
     })();
   }, []);
+
+  async function openSuggestions() {
+    setShowSuggest(true);
+    setSuggestLoading(true);
+    const base = await storage.getBase();
+    const key = await storage.getKey();
+    const list = await fetchSuggestions(base, key);
+    setSuggestions(list);
+    setSuggestLoading(false);
+  }
 
   async function send(text?: string) {
     const user = (text ?? input).trim();
@@ -178,6 +198,39 @@ export default function Chat() {
           <Text style={{ color: "#fff", fontSize: 18 }}>↑</Text>
         </Pressable>
       </View>
+      {locationEnabled && (
+        <Pressable
+          onPress={openSuggestions}
+          style={{ margin: 8, padding: 10, backgroundColor: "#111", borderRadius: 8,
+            borderWidth: 1, borderColor: "#222", alignItems: "center" }}
+        >
+          <Text style={{ color: palette.accent, fontSize: 12 }}>
+            ✨ Bạn của Kem gợi ý cho hôm nay
+          </Text>
+        </Pressable>
+      )}
+
+      <Modal visible={showSuggest} transparent animationType="slide"
+        onRequestClose={() => setShowSuggest(false)}>
+        <Pressable style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.7)", justifyContent: "flex-end" }}
+          onPress={() => setShowSuggest(false)}>
+          <View style={{ backgroundColor: "#111", borderTopLeftRadius: 16, borderTopRightRadius: 16,
+            padding: 20, minHeight: 180 }} onStartShouldSetResponder={() => true}>
+            <Text style={{ color: palette.fg, fontSize: 15, marginBottom: 12 }}>
+              Bạn của Kem gợi ý ✨
+            </Text>
+            {suggestLoading ? (
+              <Text style={{ color: "#666" }}>Đang tìm gợi ý...</Text>
+            ) : suggestions.length === 0 ? (
+              <Text style={{ color: "#666" }}>Không có gợi ý nào lúc này.</Text>
+            ) : (
+              suggestions.map((s, i) => (
+                <Text key={i} style={{ color: palette.fg, marginBottom: 8, lineHeight: 20 }}>{s}</Text>
+              ))
+            )}
+          </View>
+        </Pressable>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
