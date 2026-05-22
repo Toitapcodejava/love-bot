@@ -66,6 +66,26 @@ export async function disableLocation(): Promise<void> {
   await SecureStore.setItemAsync(LOCATION_ENABLED_KEY, "0");
 }
 
+export async function restartLocationIfNeeded(): Promise<void> {
+  const enabled = await isLocationEnabled();
+  if (!enabled) return;
+
+  const isRunning = await Location.hasStartedLocationUpdatesAsync(TASK_NAME).catch(() => false);
+  if (isRunning) return;
+
+  await Location.startLocationUpdatesAsync(TASK_NAME, {
+    accuracy: Location.Accuracy.Balanced,
+    timeInterval: 15 * 60 * 1000,
+    distanceInterval: 200,
+    deferredUpdatesInterval: 15 * 60 * 1000,
+    showsBackgroundLocationIndicator: false,
+    foregroundService: {
+      notificationTitle: "Bạn của Kem",
+      notificationBody: "Đang cập nhật vị trí",
+    },
+  });
+}
+
 export async function fetchSuggestions(base: string, key: string): Promise<string[]> {
   const r = await fetch(`${base}/location/suggest`, {
     headers: { "x-app-key": key },
