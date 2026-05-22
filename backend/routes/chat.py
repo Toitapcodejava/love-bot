@@ -67,6 +67,7 @@ async def chat(payload: ChatIn, request: Request):
 
         try:
             while True:
+                needs_search = False
                 async for chunk in respond_stream(current_messages, rag, payload.user_status):
                     if isinstance(chunk, dict) and "final" in chunk:
                         final = chunk["final"]
@@ -85,6 +86,7 @@ async def chat(payload: ChatIn, request: Request):
                             yield {"event": "tool", "data": json.dumps(frontend_tools, ensure_ascii=False)}
 
                         if web_search_calls:
+                            needs_search = True
                             yield {"event": "searching", "data": ""}
                             assistant_content = [
                                 {"type": "tool_use", "id": c["id"], "name": c["name"], "input": c["args"]}
@@ -107,16 +109,13 @@ async def chat(payload: ChatIn, request: Request):
                             current_messages = current_messages + [
                                 {"role": "user", "content": tool_results}
                             ]
-                            break  # break inner for-loop, continue while-loop
-                        else:
-                            break
                     else:
                         if hasattr(chunk, "type") and chunk.type == "content_block_delta":
                             d = chunk.delta
                             if getattr(d, "type", None) == "text_delta":
                                 ai_text += d.text
                                 yield {"event": "text", "data": d.text}
-                else:
+                if not needs_search:
                     break
 
             if ai_text:
