@@ -7,6 +7,7 @@ const TAB_CONFIG = [
   { name: "index",    emoji: "💬", label: "Chat"    },
   { name: "memory",   emoji: "🔖", label: "Ký ức"   },
   { name: "rage",     emoji: "🔥", label: "Đập"     },
+  { name: "gps",      emoji: "📍", label: "GPS"     },
   { name: "settings", emoji: "⚙️", label: "Cài đặt" },
 ];
 
