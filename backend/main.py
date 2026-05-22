@@ -9,6 +9,7 @@ from routes import chat as chat_route, vent as vent_route, rage as rage_route, m
 from routes.push import router as push_router
 from routes.location import router as location_router
 from routes.admin import router as admin_router
+from routes.quotes import router as quotes_router
 
 
 @asynccontextmanager
@@ -32,6 +33,7 @@ app.include_router(memory_route.router)
 app.include_router(push_router)
 app.include_router(location_router)
 app.include_router(admin_router)
+app.include_router(quotes_router)
 
 
 @app.get("/health")
