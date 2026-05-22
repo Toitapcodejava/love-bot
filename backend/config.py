@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     database_url: str
     app_shared_key: str
     admin_key: str
+    serper_api_key: str = ""
     chat_model: str = "claude-sonnet-4-6"
     extract_model: str = "claude-haiku-4-5-20251001"
 
