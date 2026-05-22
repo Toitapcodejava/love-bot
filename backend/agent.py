@@ -47,6 +47,18 @@ TOOLS = [
             "required": ["content", "tag"],
         },
     },
+    {
+        "name": "web_search",
+        "description": "Tìm kiếm thông tin trên web khi cần thông tin ngoài kiến thức của bạn: sách, phim, địa điểm, sự kiện, tin tức, giá cả, v.v.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "Từ khóa tìm kiếm bằng tiếng Việt hoặc tiếng Anh"},
+                "num_results": {"type": "integer", "description": "Số kết quả cần lấy, mặc định 3", "default": 3},
+            },
+            "required": ["query"],
+        },
+    },
 ]
 
 

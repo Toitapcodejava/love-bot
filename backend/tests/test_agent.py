@@ -38,3 +38,15 @@ def test_parse_tool_calls_skips_non_tool_blocks():
     raw_blocks = [{"type": "text", "text": "hello"}]
     out = parse_tool_calls(raw_blocks)
     assert out == []
+
+
+def test_tools_list_includes_web_search():
+    from agent import TOOLS
+    names = [t["name"] for t in TOOLS]
+    assert "web_search" in names
+
+def test_web_search_tool_schema_has_required_query():
+    from agent import TOOLS
+    tool = next(t for t in TOOLS if t["name"] == "web_search")
+    assert "query" in tool["input_schema"]["properties"]
+    assert "query" in tool["input_schema"]["required"]
