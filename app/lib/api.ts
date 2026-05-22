@@ -11,13 +11,14 @@ export async function chatStream(
   onMood: (m: MoodData) => void,
   onDone: () => void,
   onError: (e: any) => void,
+  statusContext?: string,
 ) {
   const base = await storage.getBase();
   const key = await storage.getKey();
   const es = new EventSource(`${base}/chat`, {
     method: "POST",
     headers: { "x-app-key": key, "content-type": "application/json" },
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ message, user_status: statusContext }),
     pollingInterval: 0,
   });
   es.addEventListener("text", (e: any) => onText(e.data));

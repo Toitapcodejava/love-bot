@@ -9,6 +9,8 @@ import { chatStream, MoodData } from "@/lib/api";
 import { ChatBubble } from "@/components/ChatBubble";
 import { Avatar, Mood } from "@/components/Avatar";
 import { TypingIndicator } from "@/components/TypingIndicator";
+import { StatusChip } from "@/components/StatusChip";
+import { useUserStatus, statusContext, UserStatus } from "@/lib/userStatus";
 import { useTheme } from "@/lib/theme";
 import { executeTools } from "@/lib/toolExecutor";
 
@@ -23,6 +25,7 @@ const FIRST_RUN_KEY = "FIRST_RUN_DONE";
 export default function Chat() {
   const { palette } = useTheme();
   const insets = useSafeAreaInsets();
+  const { status, setStatus } = useUserStatus();
   const [msgs, setMsgs] = useState<Msg[]>([
     { role: "assistant", content: "Lâu không thấy. Lại có chuyện gì rồi à?" }
   ]);
@@ -35,7 +38,7 @@ export default function Chat() {
     (async () => {
       const done = await SecureStore.getItemAsync(FIRST_RUN_KEY);
       if (!done) {
-        setMsgs([{ role: "assistant", content: "Ờ. Thằng dev nó làm cái này cho mày. Đừng cảm động vội — tao là loại khó tính. Bắt đầu kể đi." }]);
+        setMsgs([{ role: "assistant", content: "Ờ. Thằng dev nó làm cái này cho mày. Đừng cảm động vội — tao là loại khó tính. Bắt đầu kể đi, Kem." }]);
         await SecureStore.setItemAsync(FIRST_RUN_KEY, "1");
       }
     })();
@@ -66,6 +69,7 @@ export default function Chat() {
       },
       () => setStreaming(false),
       (e) => { console.error(e); setStreaming(false); setMood("neutral"); },
+      statusContext(status),
     );
   }
 
@@ -88,7 +92,7 @@ export default function Chat() {
       }}>
         <Avatar mood={mood} streaming={streaming} size={42} />
         <View>
-          <Text style={{ color: palette.fg, fontSize: 15, fontWeight: "700" }}>Kem</Text>
+          <Text style={{ color: palette.fg, fontSize: 15, fontWeight: "700" }}>Bạn của Kem</Text>
           {streaming
             ? <TypingIndicator showLabel={true} />
             : <Text style={{ color: palette.accent, fontSize: 11 }}>● online</Text>
@@ -113,6 +117,14 @@ export default function Chat() {
         ))}
       </ScrollView>
 
+      {/* Status chip row — only when status exists */}
+      {status && (
+        <StatusChip
+          status={status}
+          onUpdate={(s: UserStatus) => setStatus(s)}
+        />
+      )}
+
       {/* Input bar */}
       <View style={{
         flexDirection: "row",
@@ -124,7 +136,6 @@ export default function Chat() {
         borderTopColor: palette.border,
         alignItems: "flex-end",
       }}>
-        {/* Quick emoji */}
         <TouchableOpacity onPress={() => send("😤")} style={{ paddingBottom: 6 }}>
           <Text style={{ fontSize: 22 }}>😤</Text>
         </TouchableOpacity>
@@ -148,7 +159,6 @@ export default function Chat() {
           onSubmitEditing={() => send()}
         />
 
-        {/* Send button */}
         <Pressable
           onPress={() => send()}
           disabled={streaming}
