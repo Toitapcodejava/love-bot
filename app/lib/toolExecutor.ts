@@ -27,6 +27,7 @@ export async function executeTools(tools: ToolCall[]) {
           break;
         }
         case "memory_save": break;
+        case "web_search": break; // handled backend-side
       }
     } catch (e) { console.warn("tool error", t.name, e); }
   }

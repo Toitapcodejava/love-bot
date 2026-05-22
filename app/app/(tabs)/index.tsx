@@ -39,6 +39,7 @@ export default function Chat() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [suggestLoading, setSuggestLoading] = useState(false);
   const [locationEnabled, setLocationEnabled] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     isLocationEnabled().then(setLocationEnabled);
@@ -87,9 +88,10 @@ export default function Chat() {
           return copy;
         });
       },
-      () => setStreaming(false),
-      (e) => { console.error(e); setStreaming(false); setMood("neutral"); },
+      () => { setStreaming(false); setIsSearching(false); },
+      (e) => { console.error(e); setStreaming(false); setIsSearching(false); setMood("neutral"); },
       statusContext(status),
+      () => setIsSearching(true),
     );
   }
 
@@ -113,9 +115,11 @@ export default function Chat() {
         <Avatar mood={mood} streaming={streaming} size={42} />
         <View>
           <Text style={{ color: palette.fg, fontSize: 15, fontWeight: "700" }}>Bạn của Kem</Text>
-          {streaming
-            ? <TypingIndicator showLabel={true} />
-            : <Text style={{ color: palette.accent, fontSize: 11 }}>● online</Text>
+          {isSearching
+            ? <Text style={{ color: palette.accent, fontSize: 11 }}>🔍 Đang tìm kiếm...</Text>
+            : streaming
+              ? <TypingIndicator showLabel={true} />
+              : <Text style={{ color: palette.accent, fontSize: 11 }}>● online</Text>
           }
         </View>
       </View>
@@ -198,17 +202,15 @@ export default function Chat() {
           <Text style={{ color: "#fff", fontSize: 18 }}>↑</Text>
         </Pressable>
       </View>
-      {locationEnabled && (
-        <Pressable
-          onPress={openSuggestions}
-          style={{ margin: 8, padding: 10, backgroundColor: "#111", borderRadius: 8,
-            borderWidth: 1, borderColor: "#222", alignItems: "center" }}
-        >
-          <Text style={{ color: palette.accent, fontSize: 12 }}>
-            ✨ Bạn của Kem gợi ý cho hôm nay
-          </Text>
-        </Pressable>
-      )}
+      <Pressable
+        onPress={openSuggestions}
+        style={{ margin: 8, padding: 10, backgroundColor: "#111", borderRadius: 8,
+          borderWidth: 1, borderColor: "#222", alignItems: "center" }}
+      >
+        <Text style={{ color: palette.accent, fontSize: 12 }}>
+          ✨ Bạn của Kem gợi ý cho hôm nay
+        </Text>
+      </Pressable>
 
       <Modal visible={showSuggest} transparent animationType="slide"
         onRequestClose={() => setShowSuggest(false)}>
