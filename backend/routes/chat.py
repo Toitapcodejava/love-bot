@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from anthropic import AsyncAnthropic
 from agent import respond_stream, parse_tool_calls
 from memory import rag_top_k, recent_turns, save_turn, extract_and_save
+from search import execute_web_search
 from config import settings
 
 router = APIRouter()
@@ -62,21 +63,61 @@ async def chat(payload: ChatIn, request: Request):
         ai_text = ""
         tool_calls = []
         mood_result: tuple[str, str] = ("neutral", "💜")
+        current_messages = list(history)
+
         try:
-            async for chunk in respond_stream(history, rag, payload.user_status):
-                if isinstance(chunk, dict) and "final" in chunk:
-                    final = chunk["final"]
-                    for b in final.content:
-                        if getattr(b, "type", None) == "tool_use":
-                            tool_calls.append({"name": b.name, "args": b.input, "id": b.id})
-                    if tool_calls:
-                        yield {"event": "tool", "data": json.dumps(tool_calls, ensure_ascii=False)}
+            while True:
+                async for chunk in respond_stream(current_messages, rag, payload.user_status):
+                    if isinstance(chunk, dict) and "final" in chunk:
+                        final = chunk["final"]
+                        web_search_calls = []
+                        frontend_tools = []
+
+                        for b in final.content:
+                            if getattr(b, "type", None) == "tool_use":
+                                if b.name == "web_search":
+                                    web_search_calls.append({"name": b.name, "args": b.input, "id": b.id})
+                                else:
+                                    frontend_tools.append({"name": b.name, "args": b.input, "id": b.id})
+                                    tool_calls.append({"name": b.name, "args": b.input, "id": b.id})
+
+                        if frontend_tools:
+                            yield {"event": "tool", "data": json.dumps(frontend_tools, ensure_ascii=False)}
+
+                        if web_search_calls:
+                            yield {"event": "searching", "data": ""}
+                            assistant_content = [
+                                {"type": "tool_use", "id": c["id"], "name": c["name"], "input": c["args"]}
+                                for c in web_search_calls
+                            ]
+                            current_messages = current_messages + [
+                                {"role": "assistant", "content": assistant_content}
+                            ]
+                            tool_results = []
+                            for c in web_search_calls:
+                                search_result = await execute_web_search(
+                                    c["args"]["query"],
+                                    c["args"].get("num_results", 3),
+                                )
+                                tool_results.append({
+                                    "type": "tool_result",
+                                    "tool_use_id": c["id"],
+                                    "content": search_result,
+                                })
+                            current_messages = current_messages + [
+                                {"role": "user", "content": tool_results}
+                            ]
+                            break  # break inner for-loop, continue while-loop
+                        else:
+                            break
+                    else:
+                        if hasattr(chunk, "type") and chunk.type == "content_block_delta":
+                            d = chunk.delta
+                            if getattr(d, "type", None) == "text_delta":
+                                ai_text += d.text
+                                yield {"event": "text", "data": d.text}
                 else:
-                    if hasattr(chunk, "type") and chunk.type == "content_block_delta":
-                        d = chunk.delta
-                        if getattr(d, "type", None) == "text_delta":
-                            ai_text += d.text
-                            yield {"event": "text", "data": d.text}
+                    break
 
             if ai_text:
                 mood_result = await classify_mood(ai_text)
